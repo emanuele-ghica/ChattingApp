@@ -2,6 +2,7 @@ import { Component, inject, input, OnDestroy, output} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../_services/account.service';
 import { Subscription } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
@@ -13,6 +14,8 @@ import { Subscription } from 'rxjs';
 export class RegisterComponent implements OnDestroy {
 
   private accountService = inject(AccountService);
+  private toastr = inject(ToastrService);
+
   subscription = new Subscription();
 
 // @Input() usersFromHomeComponent => we go to home's template and we add [usersFrom...]="users" (users is any in home component) to app-register || Parent to child
@@ -33,7 +36,8 @@ cancelRegister = output<boolean>();            // new way of having data go from
       next: response => {
         console.log(response);
         this.cancel()
-      }
+      },
+      error: error => this.toastr.error(error.error),
     })
     this.subscription.add(registerSubscription);
   };

@@ -18,22 +18,24 @@ public class AccountController(DataContext context, ITokenService tokenService) 
 
         if(await UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
-        using var hmac = new HMACSHA512();   // once this class is out of scope, then the dispose method will be called because we are using "using"
+        return Ok();
 
-        var user = new AppUser 
-        {
-            UserName = registerDto.Username,
-            PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-            PasswordSalt = hmac.Key
-        };
+        // using var hmac = new HMACSHA512();   // once this class is out of scope, then the dispose method will be called because we are using "using"
 
-        context.Users.Add(user);
-        await context.SaveChangesAsync();
+        // var user = new AppUser 
+        // {
+        //     UserName = registerDto.Username,
+        //     PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
+        //     PasswordSalt = hmac.Key
+        // };
 
-        return new UserDto {
-            Username = user.UserName,
-            Token = tokenService.CreateToken(user),
-        };
+        // context.Users.Add(user);
+        // await context.SaveChangesAsync();
+
+        // return new UserDto {
+        //     Username = user.UserName,
+        //     Token = tokenService.CreateToken(user),
+        // };
 
     }
 

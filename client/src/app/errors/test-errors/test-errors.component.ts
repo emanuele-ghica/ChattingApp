@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-test-errors',
@@ -11,7 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class TestErrorsComponent implements OnDestroy{
  
-  baseUrl = 'https://localhost:5001/api/';
+  baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
   private subcription = new Subscription();
   validationErrors: string[] = [];

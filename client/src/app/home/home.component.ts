@@ -1,7 +1,7 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component} from '@angular/core';
 import { RegisterComponent } from "../register/register.component";
 import { Subscription } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-home',
@@ -10,18 +10,12 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnDestroy {
-
-  
+export class HomeComponent {  
   registerMode = false;
-  http = inject(HttpClient);
-  users: any;
+
+
   subscription = new Subscription();
 
-
-  ngOnInit(): void {
-    this.getUsers();
-  }
 
   registerToggle() {
     this.registerMode = !this.registerMode;
@@ -32,17 +26,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
 
-  getUsers() {
-    const getUserSub = this.http.get('https://localhost:5001/api/users').subscribe({   // a http request always completes, as such, we don't necessarily need to unsubcribe.
-      next: response => this.users = response,
-      error: error => console.log(error),
-      complete: () => console.log('Request has completed')
-    });
-    this.subscription.add(getUserSub);
-  };
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
 
 }

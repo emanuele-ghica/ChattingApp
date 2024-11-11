@@ -6,11 +6,12 @@ import { Subscription } from 'rxjs';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { PhotoEditorComponent } from "../../members/photo-editor/photo-editor.component";
 
 @Component({
   selector: 'app-member-edit',
   standalone: true,
-  imports: [TabsModule, FormsModule],
+  imports: [TabsModule, FormsModule, PhotoEditorComponent, PhotoEditorComponent],
   templateUrl: './member-edit.component.html',
   styleUrl: './member-edit.component.css'
 })
@@ -50,6 +51,10 @@ export class MemberEditComponent implements OnInit, OnDestroy{
       }
     })
     this.subscription.add(updateMemberSubscription);
+  }
+
+  onMemberChange(event: Member) {
+    this.member = event;
   }
 
 

@@ -1,22 +1,29 @@
-import { Component, inject, input, OnDestroy, output} from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, OnDestroy, OnInit, output} from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { AccountService } from '../_services/account.service';
 import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { TextInputComponent } from "../_forms/text-input/text-input.component";
+import { DatePickerComponent } from '../_forms/date-picker/date-picker.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule],
+  imports: [ReactiveFormsModule, TextInputComponent, DatePickerComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
-export class RegisterComponent implements OnDestroy {
-
+export class RegisterComponent implements OnInit, OnDestroy {
+ 
   private accountService = inject(AccountService);
-  private toastr = inject(ToastrService);
-
+  private fb = inject(FormBuilder);
+  private router = inject(Router)
+  cancelRegister = output<boolean>();            // new way of having data go from the child to parent
+  registerForm: FormGroup = new FormGroup({});
   subscription = new Subscription();
+  maxDate = new Date();
+  validationErrors:  string[] | undefined;
+
 
 // @Input() usersFromHomeComponent => we go to home's template and we add [usersFrom...]="users" (users is any in home component) to app-register || Parent to child
 
@@ -27,17 +34,41 @@ export class RegisterComponent implements OnDestroy {
 // }
 
 // usersFromHomeComponent = input.required<any>() // new way of having data go from the parent to child using signals
-cancelRegister = output<boolean>();            // new way of having data go from the child to parent
 
-  model: any = {}
+  ngOnInit(): void {
+    this.initializeForm();
+    this.maxDate.setFullYear(this.maxDate.getFullYear() - 18);
+  }
+
+  initializeForm() {
+    this.registerForm = this.fb.group({
+      gender: ['male'],
+      username: ['', Validators.required],
+      knownAs: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      city: ['', Validators.required],
+      country: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(8)]],
+      confirmPassword: ['', [Validators.required, this.matchValues('password')]],
+    })
+    this.registerForm.controls['password'].valueChanges.subscribe({
+      next: () => this.registerForm.controls['confirmPassword'].updateValueAndValidity()
+    })
+  } 
+
+  matchValues(matchTo: string): ValidatorFn {
+    return (control: AbstractControl) => {
+      return control.value === control.parent?.get(matchTo)?.value ? null : {isMatching: true}
+    }
+  }
+  
 
   register() {
-    const registerSubscription = this.accountService.register(this.model).subscribe({
-      next: response => {
-        console.log(response);
-        this.cancel()
-      },
-      error: error => this.toastr.error(error.error),
+    const dateOfBirth = this.getDateOnly(this.registerForm.get('dateOfBirth')?.value);
+    this.registerForm.patchValue({dateOfBirth: dateOfBirth});
+    const registerSubscription = this.accountService.register(this.registerForm.value).subscribe({
+      next: _ => this.router.navigateByUrl('/members'),
+      error: error => this.validationErrors = error,
     })
     this.subscription.add(registerSubscription);
   };
@@ -45,6 +76,11 @@ cancelRegister = output<boolean>();            // new way of having data go from
   cancel() {
     this.cancelRegister.emit(false);   // this is used in both ways old and new
   };
+
+  private getDateOnly(dateOfBirth: string | undefined) {
+    if(!dateOfBirth) return;
+    return new Date(dateOfBirth).toISOString().slice(0,10);
+  }
 
 
   ngOnDestroy(): void {

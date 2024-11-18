@@ -2,6 +2,7 @@ using System.Security.Claims;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -15,8 +16,10 @@ public class UsersController(IUserRepository userRepository, IMapper mapper,
     IPhotoService photoService) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers() {       // a method to return all the users
-        var users = await userRepository.GetMembersAsync();                    // IEnumerable means that the data received(AppUser) is represented by a collection of elements
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams) {       // a method to return all the users
+        userParams.CurrentUsername = User.GetUsername();
+        var users = await userRepository.GetMembersAsync(userParams); 
+        Response.AddPaginationHeader(users);                                   // IEnumerable means that the data received(AppUser) is represented by a collection of elements
         return Ok(users);                                                      // that can be enumerated(looped through)
     }
 

@@ -24,7 +24,8 @@ public class UsersController(IUserRepository userRepository, IMapper mapper,
     }
 
     [HttpGet("{username}")]  // /api/users/3    we need curly braces {}  because then it's gonna be the values of the username instead of the "username"
-      public async Task<ActionResult<MemberDto>> GetUser(string username) {    // using Action Result allows us to return different response types on the same action method
+      public async Task<ActionResult<MemberDto>> GetUser(string username) 
+      {                                                                        // using Action Result allows us to return different response types on the same action method
         var user = await userRepository.GetMemberAsync(username);              // User can be null here
 
         if(user == null) return NotFound();                                    // we check here if the user returned is null and if it is we send a 404 Not Found to the client
